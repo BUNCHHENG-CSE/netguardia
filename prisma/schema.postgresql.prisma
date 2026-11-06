@@ -1,0 +1,188 @@
+// ============================================================================
+// NetGuardia Prisma Schema — PostgreSQL Engine (Production Multi-Site / Neon)
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Credential {
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  protocol               String   @default("SSH")
+  username               String
+  encryptedPassword      String?  @map("encrypted_password")
+  encryptedEnableSecret  String?  @map("encrypted_enable_secret")
+  encryptedSshKey        String?  @map("encrypted_ssh_key")
+  encryptedSnmpCommunity String?  @map("encrypted_snmp_community")
+  description            String?
+  lastVerifiedAt         String?  @map("last_verified_at")
+  createdAt              String   @map("created_at")
+
+  devices Device[]
+
+  @@index([name], map: "idx_credentials_name")
+  @@map("credentials")
+}
+
+model Device {
+  id                     Int     @id @default(autoincrement())
+  hostname               String  @unique
+  ipAddress              String  @map("ip_address")
+  sshPort                Int     @default(22) @map("ssh_port")
+  vendor                 String
+  model                  String
+  osType                 String  @map("os_type")
+  role                   String
+  site                   String
+  credentialId           Int?    @map("credential_id")
+  isSimulated            Int     @default(1) @map("is_simulated")
+  status                 String  @default("online")
+  driftDetected          Int     @default(0) @map("drift_detected")
+  lkgSnapshotId          Int?    @map("lkg_snapshot_id")
+  latestSnapshotId       Int?    @map("latest_snapshot_id")
+  lastBackupAt           String? @map("last_backup_at")
+  lastVerifiedAt         String? @map("last_verified_at")
+  simulatedRunningConfig String? @map("simulated_running_config")
+  simulatedNeighborRaw   String? @map("simulated_neighbor_raw")
+  createdAt              String  @map("created_at")
+
+  credential    Credential?      @relation(fields: [credentialId], references: [id], onDelete: SetNull)
+  snapshots     ConfigSnapshot[] @relation("DeviceSnapshots")
+  neighborLinks NeighborLink[]
+  alerts        Alert[]
+
+  @@index([site, hostname], map: "idx_devices_site_hostname")
+  @@index([driftDetected], map: "idx_devices_drift_detected")
+  @@index([credentialId], map: "idx_devices_credential_id")
+  @@map("devices")
+}
+
+model ConfigSnapshot {
+  id                  Int     @id @default(autoincrement())
+  deviceId            Int     @map("device_id")
+  versionNumber       Int     @map("version_number")
+  configText          String  @map("config_text")
+  rawHash             String  @map("raw_hash")
+  normalizedHash      String  @map("normalized_hash")
+  sizeBytes           Int     @map("size_bytes")
+  collectedBy         String  @default("Scheduled Collector") @map("collected_by")
+  inMaintenanceWindow Int     @default(0) @map("in_maintenance_window")
+  isLkg               Int     @default(0) @map("is_lkg")
+  notes               String?
+  createdAt           String  @map("created_at")
+
+  device Device @relation("DeviceSnapshots", fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, versionNumber], map: "idx_snapshots_device_version")
+  @@index([deviceId, isLkg], map: "idx_snapshots_device_lkg")
+  @@map("config_snapshots")
+}
+
+model NeighborLink {
+  id             Int     @id @default(autoincrement())
+  deviceId       Int     @map("device_id")
+  localPort      String  @map("local_port")
+  remoteHostname String  @map("remote_hostname")
+  remotePort     String  @map("remote_port")
+  remoteIp       String? @map("remote_ip")
+  remotePlatform String? @map("remote_platform")
+  protocol       String  @default("LLDP")
+  updatedAt      String  @map("updated_at")
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId], map: "idx_neighbor_links_device")
+  @@index([remoteHostname], map: "idx_neighbor_links_remote")
+  @@map("neighbor_links")
+}
+
+model MaintenanceWindow {
+  id               Int    @id @default(autoincrement())
+  name             String
+  site             String @default("ALL")
+  dayOfWeek        String @map("day_of_week")
+  startTimeUtc     String @map("start_time_utc")
+  endTimeUtc       String @map("end_time_utc")
+  isActiveOverride Int    @default(0) @map("is_active_override")
+  autoPromoteLkg   Int    @default(1) @map("auto_promote_lkg")
+  createdAt        String @map("created_at")
+
+  @@index([site], map: "idx_maintenance_windows_site")
+  @@map("maintenance_windows")
+}
+
+model Alert {
+  id                       Int     @id @default(autoincrement())
+  deviceId                 Int     @map("device_id")
+  snapshotId               Int?    @map("snapshot_id")
+  severity                 String
+  alertType                String  @map("alert_type")
+  title                    String
+  message                  String
+  outsideMaintenanceWindow Int     @default(1) @map("outside_maintenance_window")
+  addedLines               Int     @default(0) @map("added_lines")
+  removedLines             Int     @default(0) @map("removed_lines")
+  riskCategories           String? @map("risk_categories")
+  acknowledged             Int     @default(0)
+  createdAt                String  @map("created_at")
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([acknowledged, id], map: "idx_alerts_unack_id")
+  @@index([deviceId, alertType], map: "idx_alerts_device_type")
+  @@map("alerts")
+}
+
+model BackupSettings {
+  id                       Int     @id @default(1)
+  scheduleEnabled          Int     @default(1) @map("schedule_enabled")
+  intervalMinutes          Int     @default(360) @map("interval_minutes")
+  cronExpression           String  @default("0 */6 * * *") @map("cron_expression")
+  noiseFilterEnabled       Int     @default(1) @map("noise_filter_enabled")
+  alertOnOutOfWindow       Int     @default(1) @map("alert_on_out_of_window")
+  staleBackupThresholdDays Int     @default(7) @map("stale_backup_threshold_days")
+  webhookUrl               String? @default("https://hooks.slack.com/services/T000/B000/NETGUARDIA-OPS") @map("webhook_url")
+  notificationEmail        String? @default("netops-alerts@smallteam.io") @map("notification_email")
+  lastGlobalRunAt          String? @map("last_global_run_at")
+  lastReadinessAuditAt     String? @map("last_readiness_audit_at")
+
+  @@map("backup_settings")
+}
+
+model ComplianceRule {
+  id             Int     @id @default(autoincrement())
+  ruleId         String  @unique @map("rule_id")
+  name           String
+  description    String
+  severity       String  @default("HIGH") // CRITICAL, HIGH, MEDIUM, LOW
+  vendor         String  @default("ALL")  // ALL, Cisco, Juniper, Ubiquiti
+  patternType    String  @default("must_contain") @map("pattern_type")
+  pattern        String
+  remediationCli String  @map("remediation_cli")
+  enabled        Int     @default(1)
+  createdAt      String  @map("created_at")
+
+  @@index([vendor], map: "idx_compliance_rules_vendor")
+  @@map("compliance_rules")
+}
+
+model AuditLog {
+  id           Int     @id @default(autoincrement())
+  timestamp    String
+  action       String  // BACKUP_RUN, DRIFT_DETECTED, LKG_PROMOTED, ROLLBACK_EXECUTED, VAULT_VERIFIED, COMPLIANCE_SCANNED, DR_EXPORTED
+  severity     String  @default("INFO") // INFO, WARNING, CRITICAL, SUCCESS
+  actor        String  @default("System / NetOps")
+  target       String  // e.g. "hq-edge-fw01", "Fleet (10 devices)"
+  details      String  // detailed summary
+  metadataJson String? @map("metadata_json")
+
+  @@index([timestamp], map: "idx_audit_logs_timestamp")
+  @@index([action], map: "idx_audit_logs_action")
+  @@map("audit_logs")
+}
