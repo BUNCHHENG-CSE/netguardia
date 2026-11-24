@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { scanDeviceCompliance, ComplianceRuleDefinition } from '@/lib/complianceEngine';
-import { jsonResponse } from '@/lib/apiUtils';
+import { jsonResponse, loadSnapshotsByIds } from '@/lib/apiUtils';
 
 
 export async function GET() {
@@ -18,17 +18,12 @@ export async function GET() {
   }));
 
   const devices = await prisma.device.findMany();
+  const snapMap = await loadSnapshotsByIds(devices.map((d) => d.latestSnapshotId || d.lkgSnapshotId));
   const deviceResults = [];
 
   for (const dev of devices) {
     const snapId = dev.latestSnapshotId || dev.lkgSnapshotId;
-    let cfgText = '';
-    if (snapId) {
-      const snap = await prisma.configSnapshot.findUnique({ where: { id: snapId } });
-      if (snap) {
-        cfgText = snap.configText || '';
-      }
-    }
+    const cfgText = (snapId && snapMap.get(snapId)?.configText) || '';
 
     const res = scanDeviceCompliance(dev, rules, cfgText);
     deviceResults.push(res);

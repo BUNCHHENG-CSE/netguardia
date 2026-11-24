@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   ShieldCheck,
   ShieldAlert,
-  AlertTriangle,
   CheckCircle2,
   XCircle,
   Copy,
@@ -11,7 +10,6 @@ import {
   Plus,
   Trash2,
   Terminal,
-  FileText,
   ChevronDown,
   ChevronUp,
   Server,
@@ -21,7 +19,6 @@ import { api } from '../api';
 import type {
   ComplianceRule,
   FleetComplianceReport,
-  DeviceComplianceResult,
 } from '../types';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';

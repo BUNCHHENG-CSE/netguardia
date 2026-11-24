@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { decryptSecret } from './vault';
+
 import { computeConfigHashes, compareConfigs } from './diffEngine';
 import { parseNeighborCliOutput } from './topologyEngine';
 import { logAuditEvent } from './audit';

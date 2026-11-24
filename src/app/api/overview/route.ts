@@ -10,9 +10,12 @@ export async function GET() {
   };
   const staleDaysLimit = settings.staleBackupThresholdDays ?? 7;
 
-  const devices = await prisma.device.findMany();
-  const unackAlerts = await prisma.alert.count({ where: { acknowledged: 0 } });
-  const totalNeighborLinks = await prisma.neighborLink.count();
+  const [devices, unackAlerts, totalNeighborLinks, dbInfo] = await Promise.all([
+    prisma.device.findMany(),
+    prisma.alert.count({ where: { acknowledged: 0 } }),
+    prisma.neighborLink.count(),
+    getDatabaseEngineInfo(),
+  ]);
 
   const sites = Array.from(new Set(devices.map((d) => d.site))).sort();
   const totalDevices = devices.length;
@@ -38,7 +41,6 @@ export async function GET() {
 
   const manualHoursSaved = Math.round(totalDevices * 1.4 * 10) / 10;
   const downtimeRiskAvoided = totalDevices * 1250;
-  const dbInfo = await getDatabaseEngineInfo();
 
   return jsonResponse({
     total_devices: totalDevices,

@@ -4,11 +4,8 @@ import {
   CheckCircle2,
   Copy,
   Download,
-  Eye,
-  FileCode2,
   Filter,
   GitCompare,
-  History,
   RotateCcw,
   ShieldAlert,
   ShieldCheck,
@@ -19,7 +16,7 @@ import {
 import { api } from '../api';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardTitle, CardDescription } from './ui/card';
 import { Select } from './ui/select';
 import type { ConfigSnapshotMeta, DeviceDiffResponse } from '../types';
 

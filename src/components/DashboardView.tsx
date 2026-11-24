@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
@@ -8,22 +7,13 @@ import {
   Cpu,
   DollarSign,
   FileDown,
-  Flame,
   GitCompare,
-  HelpCircle,
-  Layers,
   Network,
-  Play,
   RefreshCw,
-  RotateCcw,
-  Search,
-  Server,
   Shield,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
-  X,
-  Zap,
 } from 'lucide-react';
 import { api } from '../api';
 import { Button } from './ui/button';

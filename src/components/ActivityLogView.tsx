@@ -5,17 +5,14 @@ import {
   RotateCcw,
   RefreshCw,
   FileDown,
-  Terminal,
   CheckCircle2,
   Clock,
   Filter,
-  Check,
-  Server,
   Layers,
 } from 'lucide-react';
 import { api } from '../api';
 import type { AuditLogEntry } from '../types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 

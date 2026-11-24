@@ -1,21 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  AlertTriangle,
   Bell,
   Calendar,
   CheckCircle2,
   Clock,
-  Filter,
   GitCompare,
-  Mail,
   Plus,
   RotateCcw,
   Save,
-  Send,
-  ShieldAlert,
-  ShieldCheck,
   Trash2,
-  Zap,
 } from 'lucide-react';
 import { api } from '../api';
 import { Button } from './ui/button';

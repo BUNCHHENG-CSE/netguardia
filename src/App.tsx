@@ -4,10 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   Activity,
   Bell,
-  Cpu,
   Database,
-  FileDown,
-  GitBranch,
   KeyRound,
   Keyboard,
   LayoutDashboard,
@@ -17,10 +14,8 @@ import {
   RefreshCcw,
   Search,
   Server,
-  ShieldAlert,
   ShieldCheck,
   Sun,
-  Terminal,
 } from 'lucide-react';
 import { api } from './api';
 import { DashboardView } from './components/DashboardView';

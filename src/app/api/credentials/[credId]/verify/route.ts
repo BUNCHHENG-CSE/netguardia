@@ -19,24 +19,25 @@ export async function POST(
   const devices = await prisma.device.findMany({ where: { credentialId: id } });
   const nowIso = new Date().toISOString();
 
-  const deviceChecks = [];
-  for (const d of devices) {
-    const chk = await verifySshConnectivity(
-      d.ipAddress,
-      d.sshPort,
-      cred.username,
-      decryptSecret(cred.encryptedPassword),
-      d.isSimulated === 1
-    );
-
-    deviceChecks.push({
-      hostname: d.hostname,
-      ip_address: d.ipAddress,
-      authenticated: chk.authenticated,
-      latency_ms: chk.latency_ms,
-      message: chk.message,
-    });
-  }
+  const password = decryptSecret(cred.encryptedPassword);
+  const deviceChecks = await Promise.all(
+    devices.map(async (d) => {
+      const chk = await verifySshConnectivity(
+        d.ipAddress,
+        d.sshPort,
+        cred.username,
+        password,
+        d.isSimulated === 1
+      );
+      return {
+        hostname: d.hostname,
+        ip_address: d.ipAddress,
+        authenticated: chk.authenticated,
+        latency_ms: chk.latency_ms,
+        message: chk.message,
+      };
+    })
+  );
 
   await prisma.credential.update({
     where: { id },

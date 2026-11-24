@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
 import {
   Search,
-  SlidersHorizontal,
   Code2,
   Copy,
   Check,
   FileDown,
   GitCompare,
   Server,
-  Terminal,
-  ExternalLink,
   Sparkles,
 } from 'lucide-react';
 import { api } from '../api';
 import type { DeviceSearchResult, FleetSearchResponse } from '../types';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
 
 interface FleetSearchViewProps {

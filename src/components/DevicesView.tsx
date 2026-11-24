@@ -1,32 +1,24 @@
 import React, { useState } from 'react';
 import {
-  AlertTriangle,
-  CheckCircle2,
   Clock,
-  Copy,
   FileDown,
   Flame,
   GitCompare,
-  HardDrive,
   LayoutGrid,
   List,
   Network,
   Plus,
   RefreshCw,
-  RotateCcw,
   Search,
-  Server,
-  Shield,
   ShieldAlert,
   ShieldCheck,
-  Terminal,
   Trash2,
   X,
 } from 'lucide-react';
 import { api } from '../api';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent, CardTitle, CardDescription } from './ui/card';
 import { Input } from './ui/input';
 import { Select } from './ui/select';
 import type { CredentialProfile, NetworkDevice } from '../types';

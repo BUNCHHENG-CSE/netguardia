@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { jsonResponse, errorResponse } from '@/lib/apiUtils';
+import { jsonResponse, errorResponse, loadSnapshotsByIds } from '@/lib/apiUtils';
 
 
 export async function GET(req: NextRequest) {
@@ -34,6 +34,10 @@ export async function GET(req: NextRequest) {
   }
   const searchStr = caseSensitive ? query : query.toLowerCase();
 
+  const snapMap = await loadSnapshotsByIds(
+    devices.map((d) => (scope === 'latest' ? d.latestSnapshotId : d.lkgSnapshotId))
+  );
+
   const results = [];
   let totalMatches = 0;
 
@@ -41,7 +45,7 @@ export async function GET(req: NextRequest) {
     const snapId = scope === 'latest' ? dev.latestSnapshotId : dev.lkgSnapshotId;
     if (!snapId) continue;
 
-    const snap = await prisma.configSnapshot.findUnique({ where: { id: snapId } });
+    const snap = snapMap.get(snapId);
     if (!snap || !snap.configText) continue;
 
     const rawLines = snap.configText.split(/\r?\n/);

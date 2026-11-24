@@ -1,28 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
-  AlertOctagon,
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
   Code2,
-  Cpu,
   Download,
-  Eye,
   FileDown,
   Flame,
   GitCompare,
-  HardDrive,
-  Layers,
   Network,
   RefreshCw,
-  Router,
-  Server,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  Sparkles,
-  Wifi,
   X,
   ZoomIn,
   ZoomOut,
@@ -30,7 +14,7 @@ import {
 import { api } from '../api';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent, CardTitle, CardDescription } from './ui/card';
 import { Select } from './ui/select';
 import { useTheme } from '../lib/theme';
 import type { BlastRadiusResult, TopologyEdge, TopologyGraph, TopologyNode } from '../types';

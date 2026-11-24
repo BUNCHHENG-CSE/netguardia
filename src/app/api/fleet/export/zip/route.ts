@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import { prisma } from '@/lib/prisma';
 import { logAuditEvent } from '@/lib/audit';
+import { loadSnapshotsByIds } from '@/lib/apiUtils';
 
 export async function GET() {
   const devices = await prisma.device.findMany();
@@ -12,6 +13,7 @@ export async function GET() {
     .replace(/\..+/, '')
     .replace('T', '_');
 
+  const snapMap = await loadSnapshotsByIds(devices.flatMap((d) => [d.latestSnapshotId, d.lkgSnapshotId]));
   const zip = new JSZip();
   const manifestEntries = [];
 
@@ -27,7 +29,7 @@ export async function GET() {
     let latestNormHash = '';
     let latestVersion = 0;
     if (dev.latestSnapshotId) {
-      const snap = await prisma.configSnapshot.findUnique({ where: { id: dev.latestSnapshotId } });
+      const snap = snapMap.get(dev.latestSnapshotId);
       if (snap) {
         latestCfg = snap.configText || '';
         latestNormHash = snap.normalizedHash || '';
@@ -39,7 +41,7 @@ export async function GET() {
     let lkgNormHash = '';
     let lkgVersion = 0;
     if (dev.lkgSnapshotId) {
-      const snapLkg = await prisma.configSnapshot.findUnique({ where: { id: dev.lkgSnapshotId } });
+      const snapLkg = snapMap.get(dev.lkgSnapshotId);
       if (snapLkg) {
         lkgCfg = snapLkg.configText || '';
         lkgNormHash = snapLkg.normalizedHash || '';

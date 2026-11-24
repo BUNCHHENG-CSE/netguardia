@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import {
   CheckCircle2,
-  Copy,
-  Eye,
-  EyeOff,
   KeyRound,
   Lock,
   Plus,
-  Server,
-  Shield,
   ShieldCheck,
-  Terminal,
   Trash2,
   X,
 } from 'lucide-react';
